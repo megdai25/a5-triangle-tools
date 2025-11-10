@@ -1,7 +1,5 @@
-rootProject.name = 'Triangle-Tools'
-
-include	'Triangle.Compiler'
-include 'Triangle.AbstractMachine'
-include 'Triangle.AbstractMachine.Disassembler'
-include 'Triangle.AbstractMachine.Interpreter'
-
+rootProject.name = 'a5-triangle-tools'
+include ':Triangle.AbstractMachine'
+include ':Triangle.AbstractMachine.Disassembler'
+include ':Triangle.AbstractMachine.Interpreter'
+include ':Triangle.Compiler'

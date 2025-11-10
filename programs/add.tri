@@ -1,0 +1,24 @@
+let
+var a: Integer;
+var b: Integer;
+var sum: Integer;
+var prod: Integer
+in
+  begin
+    getint(a);       
+    getint(b);          
+
+    sum  := a + b;
+    prod := a * b;
+ 
+    put(sum); puteol(); 
+    put(prod); puteol();
+
+    if a = b then
+      begin
+        put('S'); put('a'); put('m'); put('e'); put('!'); puteol()
+      end
+	else
+	  begin
+	end
+  end
