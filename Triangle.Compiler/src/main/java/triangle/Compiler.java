@@ -30,6 +30,7 @@ import triangle.treeDrawer.Drawer;
 import com.sampullara.cli.Argument;
 import com.sampullara.cli.Args;
 import java.util.List;
+import triangle.optimiser.StatsVisitor;
 
 /**
  * The main driver class for the Triangle compiler.
@@ -46,8 +47,11 @@ public class Compiler {
     private static boolean folding = false;
 
     @Argument(value = "showTreeAfter", description = "Show AST after folding")
-
     private static boolean showTreeAfter = false;
+
+    @Argument(value = "showStats", description = "Print counts of Integer or Character expressions")
+    private static boolean showStats = false;
+
     private static Scanner scanner;
     private static Parser parser;
     private static Checker checker;
@@ -111,6 +115,15 @@ public class Compiler {
             // show tree again after folding if requested
             if (showTreeAfter) {
                 drawer.draw(theAST);
+            }
+
+            // show stats about integer and character expressions
+            if (showStats) {
+                StatsVisitor stats = new StatsVisitor();
+                theAST.visit(stats, null);
+                System.out.println("Stats:");
+                System.out.println("  IntegerExpressions:   " + stats.getIntegerCount());
+                System.out.println("  CharacterExpressions: " + stats.getCharacterCount());
             }
 
             if (reporter.getNumErrors() == 0) {
