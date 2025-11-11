@@ -577,18 +577,46 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 			int int1 = (Integer.parseInt(((IntegerExpression) node1).IL.spelling));
 			int int2 = (Integer.parseInt(((IntegerExpression) node2).IL.spelling));
 			Object foldedValue = null;
-			
-			if (o.decl == StdEnvironment.addDecl) {
-				foldedValue = int1 + int2;
-			}
 
+            // avoids depending on StdEnvironment decl names
+            String op = o.spelling;
+
+            // integer arithmetic
+            if ("+".equals(op)) {
+                foldedValue = int1 + int2;
+            }
+
+            // boolean comparisons returning true/false
+            else if ("=".equals(op)) {
+                foldedValue = (int1 == int2);
+            } else if ("<".equals(op)) {
+                foldedValue = (int1 < int2);
+            } else if ("<=".equals(op)) {
+                foldedValue = (int1 <= int2);
+            } else if (">".equals(op)) {
+                foldedValue = (int1 > int2);
+            } else if (">=".equals(op)) {
+                foldedValue = (int1 >= int2);
+            } else if ("\\=".equals(op)) {
+                foldedValue = (int1 != int2);
+            }
+
+            //nuild folded node
 			if (foldedValue instanceof Integer) {
 				IntegerLiteral il = new IntegerLiteral(foldedValue.toString(), node1.getPosition());
 				IntegerExpression ie = new IntegerExpression(il, node1.getPosition());
 				ie.type = StdEnvironment.integerType;
 				return ie;
 			} else if (foldedValue instanceof Boolean) {
-				/* currently not handled! */
+                // true/false are identifiers in the standard environment
+                String tf = ((Boolean) foldedValue) ? "true" : "false";
+                Identifier id = new Identifier(tf, node1.getPosition());
+                id.decl = ((Boolean) foldedValue) ? StdEnvironment.trueDecl : StdEnvironment.falseDecl;
+
+                SimpleVname sv = new SimpleVname(id, node1.getPosition());
+                VnameExpression ve = new VnameExpression(sv, node1.getPosition());
+                ve.type = StdEnvironment.booleanType;  // use your repo’s bool type
+                return ve;
 			}
 		}
 
