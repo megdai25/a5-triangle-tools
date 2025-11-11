@@ -35,7 +35,7 @@ import java.util.List;
  * The main driver class for the Triangle compiler.
  */
 public class Compiler {
-
+ // These options can be passed from the command line using flags.
     @Argument(value = "objectName", description = "Output object filename")
     private static String objectName = "a.tam";
 
@@ -104,9 +104,11 @@ public class Compiler {
             checker.check(theAST); // 2nd pass
 
             if (folding) {
+                // performs constant folding
                 theAST.visit(new ConstantFolder());
             }
 
+            // show tree again after folding if requested
             if (showTreeAfter) {
                 drawer.draw(theAST);
             }
@@ -131,6 +133,7 @@ public class Compiler {
 
         List<String> positionals;
         try {
+            // parse command-line arguments using CLI parser
             positionals = Args.parse(Compiler.class, args);
         } catch (IllegalArgumentException ex) {
             Args.usage(Compiler.class);
@@ -138,6 +141,7 @@ public class Compiler {
             return;
         }
 
+        // User must provide a Triangle source file to compile
         if (positionals.isEmpty()) {
             System.err.println("Triangle source file required");
             Args.usage(Compiler.class);
@@ -145,7 +149,9 @@ public class Compiler {
             return;
         }
 
+        // First argument is the input .tri file path
         String inputPath = positionals.get(0);
+        // Start compilation
         compileProgram(inputPath, objectName, showTree, false);
     }
 }

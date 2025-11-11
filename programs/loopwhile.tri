@@ -1,16 +1,10 @@
-! print out ababababa
 
 let
   var a : Integer
 in
 begin
   a := 0;
-  loop
-  begin
-    put('a');
-    a := a + 1;
-  end
-  while a < 5 do
-  	put('b');
-  
+  loop a := a + 1
+  while a < 3
+  do putint(a);
 end
