@@ -279,46 +279,59 @@ public class Parser {
 
 		switch (currentToken.kind) {
 
-		case IDENTIFIER: {
-			Identifier iAST = parseIdentifier();
-			if (currentToken.kind == Token.Kind.LPAREN) {
-				acceptIt();
-				ActualParameterSequence apsAST = parseActualParameterSequence();
-				accept(Token.Kind.RPAREN);
-				finish(commandPos);
-				commandAST = new CallCommand(iAST, apsAST, commandPos);
+            case IDENTIFIER: {
+                // Read the variable
+                Identifier iAST = parseIdentifier();
 
-			} else {
-
-				Vname vAST = parseRestOfVname(iAST);
-
-                if (currentToken.kind == Token.Kind.OPERATOR && currentToken.spelling.equals("**")) {
-                    acceptIt();
-                    IntegerLiteral twoLit = new IntegerLiteral("2", commandPos);
-                    IntegerExpression two = new IntegerExpression(twoLit, commandPos);
-                    VnameExpression left = new VnameExpression(vAST, commandPos);
-                    Operator times = new Operator("*", commandPos);
-                    BinaryExpression rhs = new BinaryExpression(left, times, two, commandPos);
-
+                // If the next token is '(', it’s a procedure call
+                if (currentToken.kind == Token.Kind.LPAREN) {
+                    acceptIt(); // move past '('
+                    ActualParameterSequence apsAST = parseActualParameterSequence(); // read the parameters
+                    accept(Token.Kind.RPAREN); // expect ')'
                     finish(commandPos);
-                    commandAST = new AssignCommand(vAST, rhs, commandPos);
-                    break;
+                    commandAST = new CallCommand(iAST, apsAST, commandPos);
+
+                } else {
+                    // Otherwise, treat it as a variable
+                    Vname vAST = parseRestOfVname(iAST);
+
+                    // If the next token is the '**' operator, this means “double the value of a”
+                    if (currentToken.kind == Token.Kind.OPERATOR && currentToken.spelling.equals("**")) {
+                        acceptIt(); // move past '**'
+
+                        // Build an expression that means “a * 2”
+                        IntegerLiteral twoLit = new IntegerLiteral("2", commandPos);
+                        IntegerExpression two = new IntegerExpression(twoLit, commandPos);
+                        VnameExpression left = new VnameExpression(vAST, commandPos);
+                        Operator times = new Operator("*", commandPos);
+                        BinaryExpression rhs = new BinaryExpression(left, times, two, commandPos);
+
+                        // Turn that into an assignment: a := a * 2
+                        finish(commandPos);
+                        commandAST = new AssignCommand(vAST, rhs, commandPos);
+                        break;
+                    }
+
+                    // Otherwise it’s a normal assignment (a := ...)
+                    accept(Token.Kind.BECOMES);
+                    Expression eAST = parseExpression();
+                    finish(commandPos);
+                    commandAST = new AssignCommand(vAST, eAST, commandPos);
                 }
-
-
-                accept(Token.Kind.BECOMES);
-				Expression eAST = parseExpression();
-				finish(commandPos);
-				commandAST = new AssignCommand(vAST, eAST, commandPos);
-			}
-		}
-			break;
+            }
+            break;
 
 		case BEGIN:
 			acceptIt();
 			commandAST = parseCommand();
 			accept(Token.Kind.END);
 			break;
+
+            case LCURLY:
+                acceptIt(); // read '{'
+                commandAST = parseCommand(); // parse whatever is inside
+                accept(Token.Kind.RCURLY);   // expect the matching '}'
+                break;
 
 		case LET: {
 			acceptIt();
