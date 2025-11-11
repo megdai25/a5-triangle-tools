@@ -352,6 +352,35 @@ public class Parser {
 		}
 			break;
 
+            case LOOP: {
+                //New command starts in the source code
+                SourcePosition loopPos = new SourcePosition();
+                start(loopPos);
+                acceptIt(); //Read the word "Loop"
+
+                //Parse the first command which runs at least once
+                Command c1AST = parseSingleCommand();
+
+                //"while" <expression> "do" <command>
+                accept(Token.Kind.WHILE);
+                Expression eAST = parseExpression();
+                accept(Token.Kind.DO);
+                //Parse the second command which only runs if E is true
+                Command c2AST = parseSingleCommand();
+
+                //Inside the while loop we want C2 then C1 again
+                SourcePosition bodyPos = new SourcePosition();
+                start(bodyPos);
+                Command bodyAST = new SequentialCommand(c2AST, c1AST, bodyPos);
+                finish(bodyPos);
+
+                //Loop C1 while E do C2 becomes the same as C1; while E do (C2; C1)
+                finish(loopPos);
+                Command whileAST = new WhileCommand(eAST, bodyAST, loopPos);
+                Command seqAST = new SequentialCommand(c1AST, whileAST, loopPos);
+                return seqAST;
+            }
+
 		case SEMICOLON:
 		case END:
 		case ELSE:
