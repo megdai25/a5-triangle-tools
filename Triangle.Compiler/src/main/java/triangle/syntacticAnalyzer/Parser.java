@@ -291,7 +291,22 @@ public class Parser {
 			} else {
 
 				Vname vAST = parseRestOfVname(iAST);
-				accept(Token.Kind.BECOMES);
+
+                if (currentToken.kind == Token.Kind.OPERATOR && currentToken.spelling.equals("**")) {
+                    acceptIt();
+                    IntegerLiteral twoLit = new IntegerLiteral("2", commandPos);
+                    IntegerExpression two = new IntegerExpression(twoLit, commandPos);
+                    VnameExpression left = new VnameExpression(vAST, commandPos);
+                    Operator times = new Operator("*", commandPos);
+                    BinaryExpression rhs = new BinaryExpression(left, times, two, commandPos);
+
+                    finish(commandPos);
+                    commandAST = new AssignCommand(vAST, rhs, commandPos);
+                    break;
+                }
+
+
+                accept(Token.Kind.BECOMES);
 				Expression eAST = parseExpression();
 				finish(commandPos);
 				commandAST = new AssignCommand(vAST, eAST, commandPos);
@@ -714,14 +729,14 @@ public class Parser {
 
 		switch (currentToken.kind) {
 
-		case IDENTIFIER: {
-			Identifier iAST = parseIdentifier();
-			accept(Token.Kind.COLON);
-			TypeDenoter tAST = parseTypeDenoter();
-			finish(formalPos);
-			formalAST = new ConstFormalParameter(iAST, tAST, formalPos);
-		}
-			break;
+            case IDENTIFIER: {
+                Identifier iAST = parseIdentifier();
+                accept(Token.Kind.COLON);
+                TypeDenoter tAST = parseTypeDenoter();
+                finish(formalPos);
+                formalAST = new ConstFormalParameter(iAST, tAST, formalPos);
+            }
+            break;
 
 		case VAR: {
 			acceptIt();

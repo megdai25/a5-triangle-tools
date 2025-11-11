@@ -84,7 +84,7 @@ public class Compiler {
             System.exit(1);
         }
 
-        scanner.enableDebugging();
+        //scanner.enableDebugging();
         scanner  = new Scanner(source);
         reporter = new ErrorReporter(false);
         parser   = new Parser(scanner, reporter);

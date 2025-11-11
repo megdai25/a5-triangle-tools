@@ -1,14 +1,8 @@
-! for a given input integer a, should print a*2 and a*4 
-
 let
-    var a: Integer
+  var a : Integer
 in
 begin
-    getint(var a);
-    a**;
-    putint(a);
-    puteol();
-    a**;
-    putint(a);
-    puteol();
+  a := 5;
+  a**;
+  putint(a);
 end
